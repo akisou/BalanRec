@@ -1,0 +1,68 @@
+# if load best model haven been trained
+load_best_model: false           # if load best model haven been trained
+saved_model_file: BALANREC_best_model.pth
+# model config
+in_size: 768                # the size of input embedding
+hid_size: 256               # the output of output embedding
+dropout: 0.2                # the dropout rate of the multi_head_attention model
+head_num: 3                 # the num of multi_head for ground truth sample
+head_num_bl: 6              # the num of multi_head for black list
+dialog_to_use_num: 8        # the num of dialogue embedding to be used in multi_head mechanism
+query_to_user_num: 20       # the num of query embedding to be used in black list
+dialog_cluster: True        # whether cluster dialogues of doctor
+black_list_using: True      # whether using the black list module
+patient_module: True        # whether using the patient module
+add_self_att_on: full       # the pattern of dataset of multi_head_attention model
+reg_weight: 1e-3            # (float) The L2 regularization weight.
+black_list_weight: 1e-2     # (float) the black list weight
+user_side_weight: 1      # (float) the user side weight
+
+# dataset config
+field_separator: "\t" #指定数据集field的分隔符
+seq_separator: " " #指定数据集中token_seq或者float_seq域里的分隔符
+USER_ID_FIELD: user_id #指定用户id域
+ITEM_ID_FIELD: item_id #指定物品id域
+RATING_FIELD: rating #指定打分rating域
+HEAD_ENTITY_ID_FIELD: head_id #指定头实体id域
+TAIL_ENTITY_ID_FIELD: tail_id #指定尾实体id域
+RELATION_ID_FIELD: relation_id #指定关系id域
+ENTITY_ID_FIELD: entity_id #指定实体id域
+PROFILE_FIELD: profile # profile 文本域
+QUERY_FIELD: q # query 文本域
+QUERY_FIELD_BL: neg_q # 黑名单 query 文本域
+DIALOG_FIELD: dialogue # dialog 文本域
+DEPART_FIELD: department # department域
+NEG_PREFIX: neg_
+LABEL_FIELD: label
+TXT_EMBEDDING_FLAG: 1
+TXT_EMBEDDING_DIM: 768
+encoding: utf-8
+#指定从什么文件里读什么列
+load_col:
+    inter: [user_id, item_id, rating]
+    user: [user_id, department, query_time, first_response_time, response_time]
+    item: [item_id, department, doctor_title, education_title, consultation_amount, patient_recommendation_score, total_access, total_article, total_patient, total_evaluation, thanks_letter_num, thanks_present, active_years, cure_satisfaction, attitude_satisfaction, comprehensive_rank, frank, fee]
+    kg: [head_id, relation_id, tail_id]
+    link: [item_id, entity_id]
+lowest_val:
+    rating: 0
+# training settings
+epochs: 50 #训练的最大轮数
+train_batch_size: 1024 #训练的batch_size
+learner: adam #使用的pytorch内置优化器
+learning_rate: 0.01 #学习率
+train_neg_sample_num: 1 #负采样数目
+eval_step: 1 #每次训练后做evalaution的次数
+stopping_step: 100 #控制训练收敛的步骤数，在该步骤数内若选取的评测标准没有什么变化，就可以提前停止了
+evalution settings: RO_RS, full
+
+eval_args:
+  group_by: ~
+  split: {'RS':[0.8, 0.1, 0.1]}
+  mode: uni100
+  order: RO
+#topk: [1, 5, 10] #评测标准使用topk，设置成10评测标准就是["Recall@10", "MRR@10", "NDCG@10", "Hit@10", "Precision@10"]
+#valid_metric: precision@1
+#metrics: ["Precision", "Recall", "MAP", "NDCG", "MRR","Hit"]
+valid_metric: AUC
+metrics: ['AUC', 'RMSE', "MAE"]
